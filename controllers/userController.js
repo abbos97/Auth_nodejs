@@ -31,7 +31,7 @@ const register = async (req, res) => {
 
         res.cookie('refreshToken', refresh, {
             httpOnly: true,
-            sameSite: "Strinct",
+            sameSite: "Strict",
             maxAge: remember ? 30 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000
         })
 
@@ -45,7 +45,6 @@ const register = async (req, res) => {
         res.status(400).json({Error: err.message, message: 'register method'})
     }
 }
-
 
 
 const login = async (req, res) => {
@@ -77,7 +76,7 @@ const login = async (req, res) => {
 
         res.cookie('refreshToken', refresh, {
             httpOnly: true,
-            sameSite: "Strinct",
+            sameSite: "Strict",
             maxAge: remember ? 30 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000
         })
 
