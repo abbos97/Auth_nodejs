@@ -58,14 +58,11 @@ const login = async (req, res) => {
         if(!user) {
             res.status(400).json({message: "Email or password not correct!"})
         }
-
         const isMatch = await user.isMatchPassword(password)
 
-        if(isMatch) {
+        if(!isMatch) {
             return res.status(400).json({message: "Password wrong!"})
         }
-
-        
 
         const access = createAccessToken(user)
         const refresh = createRefreshToken(user)
@@ -77,7 +74,7 @@ const login = async (req, res) => {
         res.cookie('refreshToken', refresh, {
             httpOnly: true,
             sameSite: "Strict",
-            maxAge: remember ? 30 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000
+            maxAge: remember ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000
         })
 
         res.json({
@@ -91,4 +88,31 @@ const login = async (req, res) => {
     }
 }
 
-module.exports = {register, login}
+const refreshToken = async (req, res) => {
+    try {
+        const refresh = req.cookies.refreshToken;
+
+        if(!refresh) {
+            return res.status(400).json({message: "refresh token not found!"})
+        }
+
+        const decoded = jwt.verify(refresh, process.env.REFRESH_TOKEN)
+
+        const user = await User.findById(decoded.id)
+
+        if(!user) {
+            return res.status(401).json({message: "User not founded!"})
+        }
+
+        const access = createAccessToken(user)
+
+        res.json({
+            token: access
+        })
+
+    }catch(err) {
+        return res.status(400).json({Error: err.message, message: "refresh token error"})
+    }
+}
+
+module.exports = {register, login, refreshToken}
